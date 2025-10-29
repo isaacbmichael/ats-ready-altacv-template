@@ -1,0 +1,460 @@
+%%%%%%%%%%%%%%%%%%
+% ALTACV — ATS-READY TEMPLATE
+% (Single-column with faux 2-column Experience)
+%
+% Author: Isaac B. Michael (isaacbmichael.github.io)
+% Derived from: The excellent altacv class/template by LianTze Lim.
+%   This file uses the altacv class; refer to the altacv repository for the
+%   class license and attribution details. This template adds an ATS mode,
+%   faux 2-column right rail, icon-silent ActualText wrappers, dash normalization,
+%   and alignment helpers (ExpSubRole / ExpRightRail), plus usage notes.
+%
+% License for this template file: MIT (see LICENSE in the repo). The altacv
+% class itself remains under its original license per the upstream project.
+%
+% Compile
+% • pdfLaTeX (portable): `latexmk -pdf template.tex`
+% • XeTeX/LuaTeX: if system fonts (Roboto Slab, Lato) are installed.
+%
+% Quick edits
+% • Template variables (name, contact, tagline, photo path)
+% • ATS/Logo toggles
+% • Experience using ExpEntry blocks; sub-roles via ExpSubRole or ExpRightRail
+% • Technical Skills (templated for both ATS and Showcase modes)
+%%%%%%%%%%%%%%%%%%
+
+\documentclass[10pt,a4paper,ragged2e,withhyper]{altacv}
+
+% --------------------------- Layout ---------------------------
+\geometry{left=1.25cm,right=1.25cm,top=1.5cm,bottom=1.5cm,columnsep=1.2cm}
+
+% --------------------- Columns & lists infra ------------------
+\usepackage{paracol}
+\usepackage{enumitem}
+\usepackage{etoolbox} % for \AtBeginEnvironment
+
+% ------------------- Engine/encoding guards -------------------
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[rm]{roboto}
+  \usepackage[defaultsans]{lato}
+\else
+  \setmainfont{Roboto Slab}
+  \setsansfont{Lato}
+\fi
+\renewcommand{\familydefault}{\sfdefault}
+
+% -------------------------- Colours --------------------------
+\definecolor{SlateGrey}{HTML}{2E2E2E}
+\definecolor{LightGrey}{HTML}{666666}
+\definecolor{ModernCVBlue}{HTML}{1F497D}
+\definecolor{LightBlue}{HTML}{4F81BD}
+\definecolor{CoolGray}{HTML}{A6A6A6}
+
+% ModernCV Blue scheme
+\colorlet{name}{SlateGrey}
+\colorlet{tagline}{LightBlue}
+\colorlet{heading}{ModernCVBlue}
+\colorlet{headingrule}{CoolGray}
+\colorlet{subheading}{LightBlue}
+\colorlet{accent}{LightBlue}
+\colorlet{emphasis}{SlateGrey}
+\colorlet{body}{LightGrey}
+
+% ------------------------ Typography -------------------------
+\renewcommand{\namefont}{\Huge\bfseries\sffamily}
+\renewcommand{\personalinfofont}{\scriptsize}
+\renewcommand{\cvsectionfont}{\Large\bfseries\sffamily}
+\renewcommand{\cvsubsectionfont}{\normalsize\bfseries\sffamily}
+
+% Remove the extra \smallskip inside \cvsubsection
+\makeatletter
+\let\IM@cvsubsection\cvsubsection
+\renewcommand{\cvsubsection}[1]{%
+  {\setlength{\smallskipamount}{0pt plus 0pt minus 0pt}%
+   \IM@cvsubsection{#1}}%
+}
+\makeatother
+
+% Org name size control used by ExpEntry (default = \normalsize\bfseries)
+\newcommand{\OrgNameFont}{\normalsize\bfseries}
+
+% Micro-typography + leniency
+\usepackage[final]{microtype}
+\emergencystretch=3em
+
+% ----------------- Accessibility / ATS helpers ----------------
+\usepackage{accsupp}
+
+% Visible content with custom extracted text
+\newcommand{\ATSVisual}[2]{\BeginAccSupp{ActualText={#1}}#2\EndAccSupp{}}
+% Alias for fields (same behavior)
+\newcommand{\ATSField}[2]{\ATSVisual{#1}{#2}}
+
+% Executive Impact helpers
+\newcommand{\impactlabel}[2]{\textbf{\textcolor{SlateGrey}{#1}}: #2}
+
+% ATS-safe square bullet (used in Strategic Impact list)
+\newcommand{\ImpactBullet}[1]{%
+  \makebox[0.75em][c]{%
+    \raisebox{0.25ex}{%
+      \ATSVisual{- }{{\color{LightBlue}\tiny #1}}%
+    }%
+  }%
+}
+
+% Global list defaults
+\setlist[itemize]{nosep}
+\setlist{after=\vspace{0pt}} % keep lists tight
+
+% Bullet geometry for Experience lists
+\newlength{\ExLabelW}   \setlength{\ExLabelW}{0.60em}
+\newlength{\ExLabelSep} \setlength{\ExLabelSep}{0.35em}
+
+% Apply only INSIDE ExpEntry
+\AtBeginEnvironment{ExpEntry}{%
+  \setlist[itemize]{%
+    nosep,
+    label=\ATSVisual{- }{\textbullet},
+    labelwidth=\ExLabelW,
+    labelsep=\ExLabelSep,
+    labelindent=0pt,
+    leftmargin=\dimexpr\ExLabelW+\ExLabelSep\relax,
+    itemindent=0pt,
+    listparindent=0pt
+  }%
+}
+
+% ---------------- ATS dash normalization (SAFE) ---------------
+\newcommand{\ATSENdash}{\BeginAccSupp{ActualText=-}\textendash\EndAccSupp{}}
+\newcommand{\ATSEMdash}{\BeginAccSupp{ActualText=--}\textemdash\EndAccSupp{}}
+
+\ifPDFTeX
+  % pdfLaTeX: map Unicode U+2013/U+2014 input to the safe macros above
+  \DeclareUnicodeCharacter{2013}{\ATSENdash} % en dash → "-"
+  \DeclareUnicodeCharacter{2014}{\ATSEMdash} % em dash → "--"
+\else
+  % Xe/LuaLaTeX: same idea via newunicodechar
+  \usepackage{newunicodechar}
+  \newunicodechar{–}{\ATSENdash}
+  \newunicodechar{—}{\ATSEMdash}
+\fi
+
+% Spacing helper between sub-roles
+\newcommand{\SubRoleGap}{\par\vspace{\medskipamount}}
+
+% -------------------- Education line macro --------------------
+\newlength{\EduYearWidth}
+\setlength{\EduYearWidth}{0.07\textwidth}
+\newlength{\EduLineSep}
+\setlength{\EduLineSep}{0.42em}
+\newcommand{\EduLine}[4]{%
+  {\begingroup
+    \noindent
+    \makebox[\EduYearWidth][l]{\normalsize #1}%
+    {\textcolor{name}{\normalsize\textbf{#2, }}\textcolor{LightBlue}{\normalsize\textbf{#3}}}%
+    \hfill {\small\textnormal{\textcolor{name}{#4}}}%
+    \par\vspace{\EduLineSep}%
+  \endgroup}%
+}
+
+% -------------- ATS: hyphenation & Unicode extract -------------
+\usepackage[none]{hyphenat}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
+\ifPDFTeX
+  \IfFileExists{glyphtounicode.tex}{\input{glyphtounicode.tex}}{}
+  \pdfgentounicode=1
+\fi
+
+% ----- Faux 2-column Experience (year gutter + right rail) -----
+% Match paracol's 0.07 : 0.93 split with the same \columnsep (1.2cm)
+\newlength{\ExpWorkW}  \setlength{\ExpWorkW}{\dimexpr\textwidth - \columnsep\relax}
+\newlength{\ExpYearW}  \setlength{\ExpYearW}{0.07\ExpWorkW}
+\newlength{\ExpSep}    \setlength{\ExpSep}{\columnsep}
+\newlength{\ExpRightW} \setlength{\ExpRightW}{\dimexpr\ExpWorkW - \ExpYearW\relax}
+
+% Roomier vertical spacing between lines in each entry
+\newcommand{\ExpGapA}{\vspace{0.25em}}  % company → job line
+\newcommand{\ExpGapB}{\vspace{0.35em}}  % job line → summary
+
+% One-column Experience entry (minipage right rail)
+% Args: 1=Years, 2=Company, 3=Title, 4=Dept/tag (may be empty), 5=Location
+\newenvironment{ExpEntry}[5]{%
+  \par\noindent
+  \makebox[\ExpYearW][l]{\normalsize\textcolor{body}{#1}}%
+  \hspace{\ExpSep}%
+  \begin{minipage}[t]{\ExpRightW}
+    \raggedright
+    {\textcolor{subheading}{{\OrgNameFont #2}}}\par
+    \ExpGapA
+    \noindent
+    {\textcolor{name}{\normalsize\bfseries #3}}%
+    \if\relax\detokenize{#4}\relax\else{\textcolor{name}{\normalsize,\ #4}}\fi
+    \hfill{\small\textcolor{name}{#5}}\par
+    \ExpGapB
+}{%
+  \end{minipage}\par
+}
+
+% Sub-role within the same entry
+\newcommand{\ExpSubRole}[3]{%
+  \par\noindent
+  {\textcolor{name}{\normalsize\bfseries #1}}%
+  \if\relax\detokenize{#2}\relax\else{\textcolor{name}{\normalsize,\ #2}}\fi
+  \hfill{\small\textcolor{name}{#3}}\par
+  \ExpGapB
+}
+
+% --- Right-rail wrapper for content outside ExpEntry (keeps alignment)
+%     Use when you want a sub-role *after* an ExpEntry but aligned with the
+%     same left edge as the role/title. Also mirrors the ExpEntry list style.
+\newenvironment{ExpRightRail}{%
+  \par\noindent
+  \makebox[\ExpYearW][l]{}%
+  \hspace{\ExpSep}%
+  \begin{minipage}[t]{\ExpRightW}
+    \raggedright
+    % Mirror the ExpEntry itemize style so bullets align
+    \setlist[itemize]{%
+      nosep,
+      label=\ATSVisual{- }{\textbullet},
+      labelwidth=\ExLabelW,
+      labelsep=\ExLabelSep,
+      labelindent=0pt,
+      leftmargin=\dimexpr\ExLabelW+\ExLabelSep\relax,
+      itemindent=0pt,
+      listparindent=0pt
+    }%
+}{%
+  \end{minipage}\par
+}
+
+% ------------------------- Global toggles ----------------------
+% How to use:
+% • ATS mode: Uncomment \ATStrue to hide the photo, switch skills to a
+%   single-column list, and normalize dashes in the text layer.
+% • Logo: \LOGOtrue enables an optional photo in showcase mode; ATS mode
+%   forces it off automatically.
+% • Tip: Escape special characters in header fields (\&, \%, \#, \_).
+% • Need a sub-role after an entry? Wrap the block in ExpRightRail to share
+%   the same right-rail alignment and bullet geometry.
+\newif\ifATS              % ATS mode: set true to hide photo, switch skills to 1-col, etc.
+% \ATStrue                 % ← uncomment to enable ATS mode
+
+\newif\ifLOGO             % independent logo toggle (ATS forces it off)
+\LOGOtrue
+\ifATS\LOGOfalse\fi
+
+% ----------------------- Contact system ------------------------
+% 1) Core line builder
+\newcommand{\ContactLineWithMark}[3]{%
+  % #1 visible mark (e.g., \textbullet\ )
+  % #2 ATS text (e.g., "Email: ...")
+  % #3 visible content (e.g., \href{...}{...})
+  \ATSVisual{#2}{\textcolor{LightBlue}{#1}\hspace{-0.25em}#3\hspace{2.25em}}%
+}
+
+% 2) Default marks per method (FontAwesome via altacv)
+\newcommand{\MarkEmail}{\faEnvelope\ }
+\newcommand{\MarkPhone}{\faPhone\ }
+\newcommand{\MarkLinkedIn}{\faLinkedin\ }
+\newcommand{\MarkPortfolio}{\faGlobe\ }
+\newcommand{\MarkLocation}{\faMapMarker\ }
+
+% 3) Wrappers with optional per-call override
+\newcommand{\EmailLine}[2][]{%
+  \ContactLineWithMark{\if\relax\detokenize{#1}\relax \MarkEmail \else #1 \fi}{Email: #2 |}{\href{mailto:#2}{#2}}%
+}
+\newcommand{\PhoneLine}[2][]{%
+  \ContactLineWithMark{\if\relax\detokenize{#1}\relax \MarkPhone \else #1 \fi}{Phone: #2 |}{\href{tel:#2}{#2}}%
+}
+% #2 should be like "linkedin.com/in/<handle>"
+\newcommand{\LinkedInLine}[2][]{%
+  \ContactLineWithMark{\if\relax\detokenize{#1}\relax \MarkLinkedIn \else #1 \fi}{LinkedIn: linkedin.com/in/#2 |}{\href{https://linkedin.com/in/#2}{#2}}%
+}
+% #2 e.g., "example.com"
+\newcommand{\PortfolioLine}[2][]{%
+  \ContactLineWithMark{\if\relax\detokenize{#1}\relax \MarkPortfolio \else #1 \fi}{Portfolio: #2 |}{\href{https://#2}{#2}}%
+}
+% #2 visible name (e.g., "City, ST"), #3 URL
+\newcommand{\LocationLine}[3][]{%
+  \ContactLineWithMark{\if\relax\detokenize{#1}\relax \MarkLocation \else #1 \fi}{Location: #2}{\href{#3}{#2}}%
+}
+
+% ---------------------- Metadata & PDF properties ------------------
+% NOTE: altacv already loads hyperref (via 'withhyper').
+% If you want to set PDF metadata, UNCOMMENT the block below.
+% To avoid "Option ... has already been used" warnings, keep these settings
+% in one place only (here) and do NOT also pass them as class/package options.
+%
+% \hypersetup{
+%   pdftitle   = {ATS-Ready altacv Resume Template},
+%   pdfauthor  = {Isaac B. Michael},
+%   pdfsubject = {ATS-friendly LaTeX resume template derived from AltaCV},
+%   pdfkeywords= {LaTeX,resume,CV,ATS,altacv}
+% }
+
+% ---------------------- Template variables ---------------------
+\newcommand{\FullName}{Your Name}
+\newcommand{\RoleTagline}{Your Role Tagline (e.g., Data \& Services Leader)} % NOTE: escape ampersands as \&
+% Contact
+\newcommand{\Email}{you@example.com}
+\newcommand{\Phone}{000-000-0000}
+\newcommand{\LinkedInHandle}{your-handle}
+\newcommand{\PortfolioURL}{example.com}
+\newcommand{\LocationName}{City, ST}
+\newcommand{\LocationURL}{https://www.google.com/maps/search/?api=1&query=City}
+% Assets
+\newcommand{\PhotoPath}{globe_high.png} % replace with your image (optional)
+
+% ============================= BODY ============================
+\begin{document}
+
+\sloppy
+
+\name{\FullName}
+\tagline{\RoleTagline}
+
+% ---- Logo (ATS-silent) ----
+\ifLOGO
+  \ifATS\else
+    \BeginAccSupp{ActualText={}}%
+      \photoR{1.9cm}{\PhotoPath}%
+    \EndAccSupp{}%
+  \fi
+\fi
+
+% --- Header with fields (custom per-method marks) ---
+\personalinfo{%
+  \EmailLine{\Email}%
+  \PhoneLine{\Phone}%
+  \LinkedInLine{\LinkedInHandle}%
+  \PortfolioLine{\PortfolioURL}%
+  \LocationLine{\LocationName}{\LocationURL}%
+}
+
+\makecvheader
+
+% ========================= EXEC PROFILE ========================
+\cvsection{Professional Summary}
+\begin{quote}
+\normalsize{\textbf{One-sentence value proposition} highlighting scope (teams, budgets, programs) and how you make outcomes repeatable via automation, governance, and design. Keep it concise and metrics-aware.}
+\end{quote}
+
+% ======================== STRATEGIC IMPACT =====================
+\cvsection{Key Achievements}
+\begin{itemize}[label={},labelsep=0.35em,leftmargin=1.55em,itemsep=0.5mm]
+  \item[\ImpactBullet{\faSquare}]
+    \impactlabel{Policy Adoption \& Standards}{Example: Co-authored guidance adopted by a federal body; replaced outdated thresholds with quality-focused evaluation.}
+  \item[\ImpactBullet{\faSquare}]
+    \impactlabel{Governance \& Controls}{Instituted enterprise KPI scorecards and codified SLAs/runbooks with escalation paths to improve reproducibility and timeliness.}
+  \item[\ImpactBullet{\faSquare}]
+    \impactlabel{Commercial Model}{Built profit-sharing SOWs/MOUs with milestones and reporting cadence—establishing durable margins for services.}
+  \item[\ImpactBullet{\faSquare}]
+    \impactlabel{Systems Architecture}{Designed a robust analytics/reporting pipeline delivering scalable, reproducible outputs for non-technical users.}
+\end{itemize}
+
+% =========================== EXPERIENCE ========================
+% Usage:
+% • Duplicate ExpEntry blocks for each role.
+% • Put sub-roles INSIDE the same ExpEntry with \ExpSubRole for perfect alignment.
+% • If you must add sub-role content AFTER the ExpEntry, wrap it in:
+%   \begin{ExpRightRail} ... \end{ExpRightRail}
+\cvsection{Experience}
+
+% ---- Template Entry 1 ----
+\begin{ExpEntry}{20XX\ATSENdash Present}{\ATSField{Company}{Company Name}}{\ATSField{Title}{Role Title}}{Department or Business Unit}{City, ST}
+\textbf{Summary:} \textcolor{body}{One-to-two sentence summary: scope, scale, tech stack, business outcomes.}
+
+\smallskip
+\begin{itemize}
+  \setlength{\itemsep}{0.5mm}
+  \item \textbf{Service Design \& Automation:} What you standardized or automated; include success metrics when possible.
+  \item \textbf{Validation \& Parity:} How you ensured reproducibility and accuracy (QA, audit logs, parity checks).
+  \item \textbf{Governance \& Enablement:} Playbooks, templates, SLAs, escalation paths; how they improved delivery.
+\end{itemize}
+\end{ExpEntry}
+
+\medskip
+
+% ---- Template Entry 2 ----
+\begin{ExpEntry}{20XX\ATSENdash 20XX}{Organization}{Role Title}{Team / Program}{City, ST}
+\textbf{Summary:} \textcolor{body}{Impact-focused summary: the problem, your solution, the measurable result.}
+
+\smallskip
+\begin{itemize}
+  \setlength{\itemsep}{0.5mm}
+  \item \textbf{Roadmap ownership:} Owned roadmap and acceptance criteria; drove cross-functional delivery.
+  \item \textbf{Data modernization:} Platform shifts, automation, or re-architecture that improved maintainability and reliability.
+  \item \textbf{Stakeholder leadership:} Briefings, trainings, and partner management that raised quality and timeliness.
+\end{itemize}
+\end{ExpEntry}
+
+\medskip
+
+% ---- Optional Sub-role within same organization ----
+% Preferred: place sub-roles *inside* the ExpEntry above. If you need
+% them outside, wrap in ExpRightRail to preserve alignment:
+\begin{ExpRightRail}
+\ExpSubRole{Sub-Role Title}{Group / Team}{City, ST}
+\textbf{Summary:} \textcolor{body}{Optional: leadership of a seasonal or parallel program; include scale and results.}
+
+\begin{itemize}
+  \setlength{\itemsep}{0.5mm}
+  \item \textbf{Scale \& Delivery:} e.g., Directed N sections serving X students; implemented cross-section comparability.
+  \item \textbf{Learning Impact:} Outcome metrics (pre\ATSENdash post, pass rates, CSAT/NPS).
+  \item \textbf{Operations:} SOPs, grading standards, automation, vendor integrations.
+\end{itemize}
+\end{ExpRightRail}
+
+% ========================= TECHNICAL SKILLS ====================
+% ATS vs Showcase:
+% • ATS branch: single-column, product-agnostic bullets (parser-friendly).
+% • Showcase branch: 3 columns; keep generic placeholders if publishing publicly.
+\cvsection{Technical Skills}
+
+\ifATS
+% --- Single-column, ATS-friendly list ---
+\begin{itemize}[leftmargin=*, itemsep=0.2em,
+                label=\ATSVisual{- }{\textbullet}, labelsep=0.35em]
+  \item \textbf{Data \& Automation:} Languages and tools (programming, scripting, version control); CI/CD; containers/orchestration
+  \item \textbf{Methods \& Governance:} Methods and frameworks; QA/testing; KPI scorecards; SLAs/runbooks; escalation paths
+  \item \textbf{Cloud \& Analytics:} Cloud platforms/data warehousing; ETL/ELT; dashboards/BI
+\end{itemize}
+\else
+% --- Human-friendly 3-column layout ---
+\columnratio{0.3,0.4,0.3}
+\begin{paracol}{3}
+
+\cvsubsection{Data \& Automation}
+\footnotesize
+Languages and tools; version control; CI/CD; containers and orchestration
+
+\switchcolumn
+
+\cvsubsection{Methods \& Governance}
+\footnotesize
+Methods and frameworks; QA/testing; KPI scorecards; SLAs and runbooks; escalation paths
+
+\switchcolumn
+
+\cvsubsection{Cloud \& Analytics}
+\footnotesize
+Cloud platforms and data warehousing; ETL/ELT; dashboards and BI
+
+\end{paracol}
+\fi
+
+% ============================= EDUCATION =======================
+\cvsection{Education}
+
+\EduLine{20XX}{Degree or Program}{University or Institution}{City, ST}
+\EduLine{20XX}{Degree or Program}{University or Institution}{City, ST}
+
+\divider
+
+\end{document}
