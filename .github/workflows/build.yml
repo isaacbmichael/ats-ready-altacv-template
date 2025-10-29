@@ -1,0 +1,47 @@
+name: Build PDFs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Build the SHOWCASE PDF from template.tex -> template.pdf
+      - name: Build showcase PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: template.tex
+          # Pass through to latexmk; keep it strict but non-interactive
+          args: -pdf -interaction=nonstopmode -halt-on-error
+
+      # Create an ATS copy of the source with \ATStrue uncommented
+      - name: Prepare ATS source
+        run: |
+          sed 's/^%\\ATStrue/\\ATStrue/' template.tex > template-ats.tex
+
+      # Build the ATS PDF from template-ats.tex -> template-ats.pdf
+      - name: Build ATS PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: template-ats.tex
+          args: -pdf -interaction=nonstopmode -halt-on-error
+
+      # Rename for a clean filename
+      - name: Rename ATS output
+        run: mv template-ats.pdf resume-ats.pdf
+
+      # Publish both PDFs as workflow artifacts
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-pdfs
+          path: |
+            template.pdf
+            resume-ats.pdf
