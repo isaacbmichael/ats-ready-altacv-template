@@ -103,12 +103,18 @@ Edit variables near the bottom of `template.tex`:
 
 ---
 
+## 🙏 Credits
+Template built on the excellent **AltaCV** class by **LianTze Lim**.
+Please refer to the upstream project for the class license and attribution details.
+
+---
 ## ⚠️ Disclaimer
-This template is provided “as is” under the MIT License with no warranty of any kind.  
-ATS behavior varies by vendor and configuration; **compatibility isn’t guaranteed**.  
+This template is provided “as is” under the MIT License with no warranty of any kind.
+ATS behavior varies by vendor and configuration; compatibility isn’t guaranteed.
 Please validate your generated PDF against the specific ATS you’ll submit to.
 
-This project is not affiliated with or endorsed by AltaCV, Font Awesome, GitHub, or any ATS vendor. All trademarks and product names are the property of their respective owners.
+This project is not affiliated with or endorsed by AltaCV, Font Awesome, GitHub, or any ATS vendor.
+All trademarks and product names are the property of their respective owners.
 
 ---
 
