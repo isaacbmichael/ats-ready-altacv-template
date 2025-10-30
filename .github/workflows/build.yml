@@ -13,38 +13,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Prevent CRLF line-endings from breaking sed/latexmk (safe to keep)
+      # Prevent CRLF from confusing grep/latexmk
       - name: Normalize line endings
         run: sed -i 's/\r$//' template.tex
 
-      # Build the SHOWCASE PDF from template.tex -> template.pdf
+      # Detect if \ATStrue is uncommented (on its own line, not preceded by %)
+      - name: Detect ATS mode
+        run: |
+          if grep -Eq '^[[:space:]]*\\ATStrue[[:space:]]*$' template.tex; then
+            echo "ATS_ON=true"  >> "$GITHUB_ENV"
+          else
+            echo "ATS_ON=false" >> "$GITHUB_ENV"
+          fi
+
+      # Build SHOWCASE only when ATS is OFF  -> template.pdf
       - name: Build showcase PDF
+        if: env.ATS_ON == 'false'
         uses: xu-cheng/latex-action@v3
         with:
           root_file: template.tex
           args: -pdf -interaction=nonstopmode -halt-on-error
 
-      # Create an ATS copy of the source with \ATStrue uncommented
-      - name: Prepare ATS source
-        run: |
-          sed -E 's/^[[:space:]]*%[[:space:]]*\\ATStrue/\\ATStrue/' template.tex > template-ats.tex
-
-      # Build the ATS PDF from template-ats.tex -> template-ats.pdf
+      # Build ATS only when ATS is ON -> resume-ats.pdf
       - name: Build ATS PDF
+        if: env.ATS_ON == 'true'
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: template-ats.tex
-          args: -pdf -interaction=nonstopmode -halt-on-error
+          root_file: template.tex
+          # same file, but set output name via latexmk -jobname
+          args: -pdf -interaction=nonstopmode -halt-on-error -jobname=resume-ats
 
-      # Rename for a clean filename
-      - name: Rename ATS output
-        run: mv template-ats.pdf resume-ats.pdf
-
-      # Publish both PDFs as workflow artifacts
-      - name: Upload PDFs
+      # Upload exactly one artifact: whichever we just built
+      - name: Upload showcase PDF
+        if: env.ATS_ON == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: resume-pdfs
-          path: |
-            template.pdf
-            resume-ats.pdf
+          name: template.pdf
+          path: template.pdf
+
+      - name: Upload ATS PDF
+        if: env.ATS_ON == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-ats.pdf
+          path: resume-ats.pdf
