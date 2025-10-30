@@ -5,6 +5,8 @@
 > **Assumptions (template):** Engine = pdfLaTeX *or* XeTeX/LuaTeX • Class = `altacv` • Paper = A4 • Faux 2-column rail (year gutter 7%) • Icons via FontAwesome • ATS toggle = off by default
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Build](https://github.com/isaacbmichael/ats-ready-altacv-template/actions/workflows/build.yml/badge.svg)
+![Release](https://img.shields.io/github/v/release/isaacbmichael/ats-ready-altacv-template?include_prereleases&label=release)
 
 ---
 
@@ -20,22 +22,29 @@
 
 ---
 
-## 📌 Latest Highlights (2025-10-29)
+## 📌 Latest Highlights (2025-10-30)
 - Added **`ExpRightRail`** to align any post-entry sub-roles with the main rail.
 - Masked **Technical Skills** to be template-ready in both ATS and Showcase modes.
-- README + CI scaffold for building **both PDFs** (showcase + ATS) automatically.
+- CI note: the provided workflow now builds **one** PDF (Showcase *or* ATS) based on `\ATStrue`.
 
 ---
 
 ## 📊 Example Outputs
-- **Showcase PDF:** `template.pdf`  
-- **ATS PDF:** `resume-ats.pdf`
 
-> **Tip:** If your logo file isn’t present, either add `assets/globe_high.png` (or change `\PhotoPath`) *or* comment out the `\photoR{...}{\PhotoPath}` line to avoid a missing-file warning.
+**Direct downloads (Release assets)**
+- **Showcase PDF:** [`template.pdf`](https://github.com/isaacbmichael/ats-ready-altacv-template/releases/latest/download/template.pdf)  
+- **ATS PDF:** [`resume-ats.pdf`](https://github.com/isaacbmichael/ats-ready-altacv-template/releases/latest/download/resume-ats.pdf)
+
+**Mobile-friendly mirrors (GitHub Pages)**
+- **Showcase PDF:** [`template.pdf`](https://isaacbmichael.github.io/assets/pdfs/template.pdf)  
+- **ATS PDF:** [`resume-ats.pdf`](https://isaacbmichael.github.io/assets/pdfs/resume-ats.pdf)
+
+> **Tip:** If your logo file isn’t present, either add `assets/globe_high.png` (or change `\PhotoPath`) *or* comment out the `\photoR{...}{\PhotoPath}` block to avoid a missing-file warning.
 
 ---
 
 ## 🚀 Quick Start
+
 ```bash
 # Build (showcase)
 latexmk -pdf template.tex
@@ -103,4 +112,4 @@ This project is not affiliated with or endorsed by AltaCV, Font Awesome, GitHub,
 
 ---
 
-© 2025 Isaac B. Michael • [Email](mailto:isaac.b.michael@gmail.com) • [LinkedIn](https://www.linkedin.com/in/isaacbmichael) • [GitHub](https://github.com/isaacbmi)
+© 2025 Isaac B. Michael • [Email](mailto:isaac.b.michael@gmail.com) • [LinkedIn](https://www.linkedin.com/in/isaacbmichael) • [GitHub](https://github.com/isaacbmichael)
