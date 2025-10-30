@@ -13,18 +13,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Prevent CRLF line-endings from breaking sed/latexmk (safe to keep)
+      - name: Normalize line endings
+        run: sed -i 's/\r$//' template.tex
+
       # Build the SHOWCASE PDF from template.tex -> template.pdf
       - name: Build showcase PDF
         uses: xu-cheng/latex-action@v3
         with:
           root_file: template.tex
-          # Pass through to latexmk; keep it strict but non-interactive
           args: -pdf -interaction=nonstopmode -halt-on-error
 
       # Create an ATS copy of the source with \ATStrue uncommented
       - name: Prepare ATS source
         run: |
-          sed 's/^%\\ATStrue/\\ATStrue/' template.tex > template-ats.tex
+          sed -E 's/^[[:space:]]*%[[:space:]]*\\ATStrue/\\ATStrue/' template.tex > template-ats.tex
 
       # Build the ATS PDF from template-ats.tex -> template-ats.pdf
       - name: Build ATS PDF
